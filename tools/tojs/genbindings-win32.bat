@@ -15,7 +15,7 @@ set TO_JS_ROOT=%COCOS2DX_ROOT%/tools/tojs
 set "CXX_GENERATOR_ROOT=%CXX_GENERATOR_ROOT:\=/%"
 set OUTPUT_DIR=%COCOS2DX_ROOT%/scripting/javascript/bindings/generated
 set "OUTPUT_DIR=%OUTPUT_DIR:/=\%"
-set CLANG_ROOT=%NDK_ROOT%/toolchains/llvm-3.1/prebuilt/windows-x86_64
+set CLANG_ROOT=%NDK_ROOT%/toolchains/llvm-3.1/prebuilt/windows
 
 :: write userconf.ini
 
