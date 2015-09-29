@@ -42,7 +42,7 @@ enum {
     kCCShaderType_Position_uColor,
     kCCShaderType_PositionLengthTexureColor,
     kCCShaderType_ControlSwitch,
-    
+	kCCShaderType_PositionIndexTextureColor,
     kCCShaderType_MAX,
 };
 
@@ -67,14 +67,19 @@ void CCShaderCache::purgeSharedShaderCache()
 
 CCShaderCache::CCShaderCache()
 : m_pPrograms(0)
+, m_scriptObjectDict(NULL)
+, m_loadShaderSelector(NULL)
+, m_loadShaderListener(NULL)
 {
-
 }
 
 CCShaderCache::~CCShaderCache()
 {
     CCLOGINFO("cocos2d deallocing 0x%X", this);
     m_pPrograms->release();
+	m_loadShaderSelector = NULL;
+	m_loadShaderListener = NULL;
+	CC_SAFE_RELEASE_NULL(m_scriptObjectDict);
 }
 
 
@@ -223,9 +228,12 @@ void CCShaderCache::reloadDefaultShaders()
     p = programForKey(kCCShader_PositionLengthTexureColor);
     p->reset();
     loadDefaultShader(p, kCCShaderType_PositionLengthTexureColor);
+
+	if (m_loadShaderListener && m_loadShaderSelector)
+	{
+		(m_loadShaderListener->*m_loadShaderSelector)(this, Load_SHADER_EVENT_RELOAD);
+	}
 }
-
-
 
 
 void CCShaderCache::loadDefaultShader(CCGLProgram *p, int type)
@@ -299,6 +307,14 @@ void CCShaderCache::loadDefaultShader(CCGLProgram *p, int type)
             p->addAttribute(kCCAttributeNameTexCoord, kCCVertexAttrib_TexCoords);
 
             break;
+	   case kCCShaderType_PositionIndexTextureColor:
+		   p->initWithVertexShaderByteArray(ccPositionTextureColor_vert, ccPositionIndexTextureColor_frag);
+
+		   p->addAttribute(kCCAttributeNamePosition, kCCVertexAttrib_Position);
+		   p->addAttribute(kCCAttributeNameColor, kCCVertexAttrib_Color);
+		   p->addAttribute(kCCAttributeNameTexCoord, kCCVertexAttrib_TexCoords);
+
+		   break;
 
         default:
             CCLOG("cocos2d: %s:%d, error shader type", __FUNCTION__, __LINE__);
@@ -319,6 +335,17 @@ CCGLProgram* CCShaderCache::programForKey(const char* key)
 void CCShaderCache::addProgram(CCGLProgram* program, const char* key)
 {
     m_pPrograms->setObject(program, key);
+}
+
+void CCShaderCache::clearProgram(const char* key)
+{
+	m_pPrograms->removeObjectForKey(key);
+}
+
+void CCShaderCache::addLoadShaderEvent(CCObject* target, LOAD_SHADER_EVENT selector) 
+{
+	m_loadShaderListener = target;
+	m_loadShaderSelector = selector;
 }
 
 NS_CC_END

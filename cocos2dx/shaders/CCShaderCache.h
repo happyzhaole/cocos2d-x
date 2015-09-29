@@ -33,6 +33,13 @@ NS_CC_BEGIN
 
 class CCGLProgram;
 
+typedef enum {
+	Load_SHADER_EVENT_RELOAD
+} LoadShaderEventType;
+
+typedef void (CCObject::*LOAD_SHADER_EVENT)(CCObject*, LoadShaderEventType);
+#define LoadShaderEventSelector(_SELECTOR) (LOAD_SHADER_EVENT)(&_SELECTOR)
+
 /**
  * @addtogroup shaders
  * @{
@@ -78,12 +85,20 @@ public:
     /** adds a CCGLProgram to the cache for a given name */
     void addProgram(CCGLProgram* program, const char* key);
 
+	/**Clear a CCGLProgram*/
+	void clearProgram(const char* key);
+
+	/**add load shader event*/
+	void addLoadShaderEvent(CCObject* target, LOAD_SHADER_EVENT selector);
+
 private:
     bool init();
     void loadDefaultShader(CCGLProgram *program, int type);
 
     CCDictionary* m_pPrograms;
-
+	CCDictionary* m_scriptObjectDict;
+	CCObject* m_loadShaderListener;
+	LOAD_SHADER_EVENT m_loadShaderSelector;
 };
 
 // end of shaders group
